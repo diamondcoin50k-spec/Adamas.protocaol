@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adamas Protocol ($ADS) | Ecosystem</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
         body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
         .container { width: 95%; max-width: 1200px; margin-top: 20px; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; flex-wrap: wrap; }
-        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); margin-bottom: 10px; }
+        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); }
         .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; }
         .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s; font-size: 16px; display: inline-block; }
         .button:hover { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); transform: scale(1.02); }
@@ -92,112 +91,21 @@
         let isWalletConnected = false;
         let isSocialVerified = false;
 
-        // 📝 ABI PASTE HERE
+        // 📝 PASTE ABI HERE
         const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
         const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
 
-                        // Wallet Connection - Robust Logic for Mobile & Laptop
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    // 1. Force network switch to Polygon Amoy Testnet (Decimal: 80002)
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x13882' }], // 80002 in hex is 0x13882
-                    });
-
-                    // 2. Request account access ONLY AFTER successful switch
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // 3. Initialize Ethers
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-                    // 4. Update UI
-                    document.getElementById('walletAddress').innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-                    document.getElementById('connectBtn').innerText = "✅ Connected";
-                    isWalletConnected = true;
-                    
-                    alert("Wallet Connected Successfully! 🦊");
-                } catch (error) {
-                    console.error("Connection Error:", error);
-                    
-                    // 5. If chain not added (Code 4902), try adding it
-                    if (error.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x13882',
-                                    chainName: 'Polygon Amoy Testnet',
-                                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                                    rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                                    blockExplorerUrls: ['https://amoy.polygonscan.com']
-                                }],
-                            });
-                            // Retry connection after adding
-                            connectWallet();
-                        } catch (addError) {
-                            alert("Network Add Error: " + addError.message);
-                        }
-                    } else {
-                        alert("Connection failed: " + error.message);
-                    }
-                }
-            } else {
-                alert("Please use MetaMask Browser!");
-            }
-        }
-
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-                    // 4. Update UI
-                    document.getElementById('walletAddress').innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-                    document.getElementById('connectBtn').innerText = "✅ Connected";
-                    isWalletConnected = true;
-                    
-                    alert("Wallet Connected Successfully! 🦊");
-                } catch (error) {
-                    console.error("Connection Error:", error);
-                    
-                    // 5. If chain not added (Code 4902), try adding it
-                    if (error.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x13882',
-                                    chainName: 'Polygon Amoy Testnet',
-                                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                                    rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                                    blockExplorerUrls: ['https://amoy.polygonscan.com']
-                                }],
-                            });
-                            // Retry connection after adding
-                            connectWallet();
-                        } catch (addError) {
-                            alert("Network Add Error: " + addError.message);
-                        }
-                    } else {
-                        alert("Connection failed: " + error.message);
-                    }
-                }
-            } else {
-                alert("Please use MetaMask Browser!");
-            }
-        }
         // Wallet Connection - Robust Logic for Mobile & Laptop
         async function connectWallet() {
             if (window.ethereum) {
                 try {
-                    // 1. Force network switch to Polygon Amoy Testnet (Decimal: 80002)
+                    // 1. Force network switch to Polygon Amoy Testnet
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x13882' }], // 80002 in hex is 0x13882
+                        params: [{ chainId: '0x13882' }], // 80002 in hex
                     });
 
-                    // 2. Request account access ONLY AFTER successful switch
+                    // 2. Request account access
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     // 3. Initialize Ethers
@@ -209,11 +117,8 @@
                     document.getElementById('walletAddress').innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
                     document.getElementById('connectBtn').innerText = "✅ Connected";
                     isWalletConnected = true;
-                    
                     alert("Wallet Connected Successfully! 🦊");
                 } catch (error) {
-                    console.error("Connection Error:", error);
-                    
                     // 5. If chain not added (Code 4902), try adding it
                     if (error.code === 4902) {
                         try {
@@ -227,8 +132,7 @@
                                     blockExplorerUrls: ['https://amoy.polygonscan.com']
                                 }],
                             });
-                            // Retry connection after adding
-                            connectWallet();
+                            connectWallet(); // Retry connection
                         } catch (addError) {
                             alert("Network Add Error: " + addError.message);
                         }
@@ -238,24 +142,6 @@
                 }
             } else {
                 alert("Please use MetaMask Browser!");
-            }
-        }
-
-                    
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-                    document.getElementById('walletAddress').innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-                    document.getElementById('connectBtn').innerText = "✅ Connected";
-                    isWalletConnected = true;
-                    alert("Wallet Connected! 🦊 Ab socials follow karke verify karein.");
-                } catch (error) {
-                    alert("Connection failed: " + error.message);
-                }
-            } else {
-                alert("MetaMask ya Web3 Wallet nahi mila! Please use Chrome with MetaMask extension.");
             }
         }
 
@@ -265,10 +151,7 @@
                 alert("🛑 Pehle Wallet Connect karo bhai! 🦊");
                 return;
             }
-
             alert("🔄 Verifying... Please follow the channels first.");
-            
-            // Simulating verification directly
             setTimeout(() => {
                 isSocialVerified = true;
                 document.getElementById('lockStatus').innerText = "✅ Verified!";
@@ -279,7 +162,7 @@
                 document.getElementById('memeCard').classList.remove('locked');
                 document.getElementById('stakeCard').classList.remove('locked');
                 alert("🎉 All features unlocked! Enjoy Adamas Protocol.");
-            }, 1000); // Fast simulation
+            }, 1000); // Simulated verification
         }
 
         // Features - Only check social verification
