@@ -81,13 +81,13 @@
         let points = 0;
         let provider, signer, contract;
         let lastTapTime = 0;
-        const TAP_COOLDOWN_MS = 500; // 0.5s limit
+        const TAP_COOLDOWN_MS = 500;
         const POINTS_REQUIRED = 10000;
         let isWalletConnected = false;
         let isSocialVerified = false;
 
-        // 📝 PASTE YOUR ABI HERE
-        const contractABI = [ /[
+        // 📝 ABI PASTE HERE
+        const contractABI = [
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -619,60 +619,32 @@
 		"stateMutability": "nonpayable",
 		"type": "function"
 	}
-]/ ];
+]
         const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
 
-        // Wallet Connection with Auto-Switch Network
+        // Wallet Connection
         async function connectWallet() {
             if (window.ethereum) {
-                try {
-                    // Auto-Switch Network
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x13882' }], // 80002
-                    });
-                } catch (switchError) {
-                    if (switchError.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x13882',
-                                    chainName: 'Polygon Amoy Testnet',
-                                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                                    rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                                    blockExplorerUrls: ['https://amoy.polygonscan.com']
-                                }],
-                            });
-                        } catch (addError) {
-                            alert("Network switch failed.");
-                        }
-                    }
-                }
-
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                    // Display Address
                     document.getElementById('walletAddress').innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
                     document.getElementById('connectBtn').innerText = "✅ Connected";
-                    
                     isWalletConnected = true;
                     alert("Wallet Connected! 🦊 Ab socials follow karke verify karein.");
-                } catch (accountError) {
+                } catch (error) {
                     alert("Account connection failed.");
                 }
             } else {
-                alert("Please install MetaMask!");
+                alert("Please use MetaMask Browser!");
             }
         }
 
-        // Social Lock Logic
+        // Social Lock Logic - Simplified
         function verifySocials() {
-            // 🛑 CHECK 1: Pehle wallet connect hona chahiye
             if (!isWalletConnected) {
                 alert("🛑 Pehle Wallet Connect karo bhai! 🦊");
                 return;
@@ -680,28 +652,23 @@
 
             alert("🔄 Verifying... Please follow the channels first.");
             
-            // Simulating API verification
+            // Simulating verification directly
             setTimeout(() => {
-                isSocialVerified = true; // Verification success
+                isSocialVerified = true;
                 document.getElementById('lockStatus').innerText = "✅ Verified!";
                 document.getElementById('lockStatus').style.color = "#00ff00";
                 
-                // 🛑 CHECK 2: Wallet + Socials dono hone par unlock
-                if (isWalletConnected && isSocialVerified) {
-                    document.getElementById('tapCard').classList.remove('locked');
-                    document.getElementById('memeCard').classList.remove('locked');
-                    document.getElementById('stakeCard').classList.remove('locked');
-                    alert("🎉 All features unlocked! Enjoy Adamas Protocol.");
-                }
-            }, 2000);
+                // Unlock cards immediately
+                document.getElementById('tapCard').classList.remove('locked');
+                document.getElementById('memeCard').classList.remove('locked');
+                document.getElementById('stakeCard').classList.remove('locked');
+                alert("🎉 All features unlocked! Enjoy Adamas Protocol.");
+            }, 1000); // Fast simulation
         }
 
-        // Tap Logic
+        // Features - Only check social verification
         function tapAction() {
-            if (!isSocialVerified) {
-                alert("🛑 Features use karne ke liye pehle verify karein.");
-                return;
-            }
+            if (!isSocialVerified) { alert("🛑 Verify socials first!"); return; }
             const now = Date.now();
             if (now - lastTapTime < TAP_COOLDOWN_MS) return;
             points++;
@@ -709,53 +676,22 @@
             document.getElementById('userPoints').innerText = points;
         }
 
-        // Conversion Logic
-        async function convertPoints() {
-            if (!isSocialVerified) {
-                alert("🛑 Features use karne ke liye pehle verify karein.");
-                return;
-            }
-            if (points < POINTS_REQUIRED) {
-                alert(`Need at least ${POINTS_REQUIRED} points!`);
-                return;
-            }
-            if (!signer) {
-                alert("Connect wallet first!");
-                return;
-            }
-            // Trigger backend points check and conversion
-            alert("🔄 Request submitted! Points check hone ke baad 24 hours mein tokens transfer ho jayenge. ⏳");
+        function convertPoints() {
+            if (!isSocialVerified) { alert("🛑 Verify socials first!"); return; }
+            if (points < POINTS_REQUIRED) { alert(`Need ${POINTS_REQUIRED} points!`); return; }
+            alert("🔄 Conversion request submitted! ⏳");
             points = 0;
             document.getElementById('userPoints').innerText = points;
         }
 
-        // Meme Upload Logic
         function uploadMeme() {
-            if (!isSocialVerified) {
-                alert("🛑 Features use karne ke liye pehle verify karein.");
-                return;
-            }
-            const fileInput = document.getElementById('memeFile');
-            if (fileInput.files.length === 0) {
-                alert("Select a meme image!");
-                return;
-            }
-            // Meme upload logic to server/database
-            alert("📤 Meme uploaded for review! Rewards will be credited after approval. ⏳");
+            if (!isSocialVerified) { alert("🛑 Verify socials first!"); return; }
+            alert("📤 Meme uploaded for review! ⏳");
         }
 
-        // Staking Logic
         function stakeTokens() {
-            if (!isSocialVerified) {
-                alert("🛑 Features use karne ke liye pehle verify karein.");
-                return;
-            }
-            if (!signer) {
-                alert("Connect wallet first!");
-                return;
-            }
-            // Trigger contract staking here based on ABI
-            alert("🔒 Staking functionality initializing... Ensure you have $ADS in wallet.");
+            if (!isSocialVerified) { alert("🛑 Verify socials first!"); return; }
+            alert("🔒 Staking initializing... ⏳");
         }
     </script>
 </body>
