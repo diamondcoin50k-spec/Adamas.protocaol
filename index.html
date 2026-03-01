@@ -115,7 +115,28 @@
         // --- UPDATED ROBUST CONNECT LOGIC ---
         connectBtn.addEventListener('click', async () => {
             if (window.ethereum) {
-                try {
+              try {
+    // 1. Network Switch
+    await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x13882' }], // Amoy Testnet
+    });
+    
+    // 2. Request Account
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    
+    // 3. IMPORTANT: Init Ethers only after account access
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    // 4. UI Update
+    connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
+    connectBtn.disabled = true;
+    isWalletConnected = true;
+    showToast("🎉 Wallet Connected Successfully! 🥳");
+}
+
                     // 1. Network Switch
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
