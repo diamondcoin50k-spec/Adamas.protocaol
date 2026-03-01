@@ -3,96 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adamas Protocol ($ADS) | Live</title>
+    <title>Adamas Protocol ($ADS) | Ecosystem</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
-        body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
+        body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
         .container { width: 90%; max-width: 1200px; margin-top: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; flex-wrap: wrap; gap: 15px;}
-        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); display: flex; align-items: center; gap: 10px; }
-        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; transition: all 0.3s ease; }
-        .card:hover { border-color: #00F2FE; }
-        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s ease; }
-        .button:hover { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); transform: translateY(-2px); }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; }
+        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); }
+        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; }
+        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s; font-size: 16px; }
+        .button:hover { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); transform: scale(1.02); }
         .button-secondary { background: #222; color: #fff; border: 1px solid #444; }
-        .button-secondary:hover { background: #333; border-color: #00F2FE; }
-        .accent { color: #00F2FE; font-weight: bold; word-break: break-all; }
-        .social-links { display: flex; gap: 10px; }
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .stat-item { background: #1a1a1a; padding: 15px; border-radius: 10px; text-align: center; }
-        .roadmap-item { margin-bottom: 15px; padding-left: 10px; border-left: 2px solid #333; }
-        .roadmap-item.active { border-left-color: #00F2FE; color: #00F2FE; }
+        .button-secondary:hover { background: #333; }
+        .tap-button { background: #00F2FE; color: #000; font-size: 24px; padding: 40px; border-radius: 50%; border: none; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 20px rgba(0, 242, 254, 0.5); margin: 20px 0; }
+        .tap-button:active { transform: scale(0.95); }
+        .accent { color: #00F2FE; font-weight: bold; font-size: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .locked { opacity: 0.5; pointer-events: none; }
+        input[type="file"] { color: white; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">💎 Adamas Protocol</div>
-            <div class="header-right">
-                <span class="social-links">
-                    <a href="https://t.me/daimodmo" target="_blank" class="button button-secondary">Telegram</a>
-                    <a href="https://twitter.com/DiamoProtocol" target="_blank" class="button button-secondary">Twitter</a>
-                </span>
-                <button class="button" id="connectBtn" onclick="connectWallet()">🦊 Connect Wallet</button>
-            </div>
+            <button class="button" id="connectBtn" onclick="connectWallet()">🦊 Connect Wallet</button>
         </header>
 
-        <div class="card" style="text-align: center;">
-            <h2 style="color: #00F2FE;">🚀 Welcome to Adamas Ecosystem</h2>
-            <p>The Future of Diamond Protocol Trading & Rewards.</p>
+        <div class="card" id="lockCard">
+            <h2 style="color: #00F2FE;">🔒 Follow to Unlock Protocol</h2>
+            <p>Features use karne ke liye social media par follow karein.</p>
+            <div style="margin: 20px 0; display: flex; gap: 10px; justify-content: center;">
+                <a href="https://t.me/daimodmo" target="_blank" class="button button-secondary">📱 Telegram</a>
+                <a href="https://twitter.com/DiamoProtocol" target="_blank" class="button button-secondary">🐦 Twitter</a>
+            </div>
+            <button class="button" onclick="verifySocials()">✅ Verify Follows</button>
+            <p id="lockStatus" style="margin-top: 15px; color: #ff4444; font-weight: bold;">❌ Features Locked</p>
+        </div>
+
+        <div class="grid">
+            <div class="card locked" id="tapCard">
+                <h2 style="color: #00F2FE;">🕹️ Tap to Earn</h2>
+                <p>Your Points: <span id="userPoints" class="accent">0</span></p>
+                <button class="tap-button" onclick="tapAction()">TAP</button>
+                <br>
+                <p>10,000 Points = 10 $ADS</p>
+                <button class="button" style="width: 100%;" onclick="convertPoints()">🔄 Convert to Tokens</button>
+            </div>
+
+            <div class="card locked" id="memeCard">
+                <h2 style="color: #00F2FE;">🎨 Meme-to-Earn</h2>
+                <p>Meme banakar upload karo!</p>
+                <input type="file" id="memeFile" accept="image/*">
+                <button class="button button-secondary" style="width: 100%;" onclick="uploadMeme()">📤 Upload Meme</button>
+                <p style="margin-top: 15px; font-size: 14px; color: #aaa;">Reward: 0.1 - 0.5 $ADS (Pending Review)</p>
+            </div>
             
-            <div class="grid-stats">
-                <div class="stat-item">💰 Total Supply<br><span class="accent">21,000 $ADS</span></div>
-                <div class="stat-item">👥 Total Holders<br><span class="accent">Loading...</span></div>
-                <div class="stat-item">🔥 Burned<br><span class="accent">0 $ADS</span></div>
+            <div class="card locked" id="stakeCard">
+                <h2 style="color: #00F2FE;">⛏️ Mining/Staking</h2>
+                <p>Pool Size: <span class="accent">6,300 $ADS</span></p>
+                <p>Earned tokens stake karke aur kamayein!</p>
+                <button class="button" style="width: 100%;" onclick="stakeTokens()">🔒 Stake $ADS</button>
             </div>
         </div>
-
-        <div class="card">
-            <h2>🎁 Claim Your $ADS Airdrop</h2>
-            <p>Wallet: <span id="walletAddress" class="accent">Not Connected</span></p>
-            <button class="button" style="width: 100%; font-size: 18px;" onclick="claimAirdrop()">🎁 Claim 100 $ADS</button>
-        </div>
-
-        <div class="card">
-            <h2>🏆 Roadmap Phase Update</h2>
-            <div class="roadmap-item active">✅ Phase 1: Contract Deployment</div>
-            <div class="roadmap-item active">⏳ Phase 2: Website & Airdrop</div>
-            <div class="roadmap-item">🔜 Phase 3: Staking & Listing</div>
-        </div>
-
-        <div class="card">
-            <h3>Contract Address</h3>
-            <p><span class="accent">0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5</span></p>
+        
+        <div class="card" style="text-align: left; margin-top: 25px;">
+            <h3>📊 Project Stats</h3>
+            <p>Contract Address: <span style="word-break: break-all; color: #4FACFE;">0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5</span></p>
+            <p>Network: <span style="color: #4FACFE;">Polygon Amoy Testnet (POL)</span></p>
         </div>
     </div>
 
     <script>
+        let points = 0;
         let provider, signer;
-        const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
+        let lastTapTime = 0;
+        const TAP_COOLDOWN_MS = 500; // 0.5s limit
+        const POINTS_REQUIRED = 10000;
+        let isUnlocked = false;
 
+        // Wallet Connection
         async function connectWallet() {
             if (window.ethereum) {
                 try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x13882', // 80002
+                            chainName: 'Polygon Amoy Testnet',
+                            nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                            rpcUrls: ['https://rpc-amoy.polygon.technology'],
+                            blockExplorerUrls: ['https://amoy.polygonscan.com']
+                        }],
+                    });
+                    
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
-                    document.getElementById('walletAddress').innerText = accounts[0];
                     document.getElementById('connectBtn').innerText = "✅ Connected";
                 } catch (error) {
-                    console.error("Connection failed:", error);
+                    alert("Connection failed");
                 }
             } else {
                 alert("Please install MetaMask!");
             }
         }
 
-        async function claimAirdrop() {
-            if (!signer) {
-                alert("Pehle wallet connect karo bro! 🦊");
+        // Social Lock Logic
+        function verifySocials() {
+            alert("🔄 Verifying... Please follow the channels first.");
+            setTimeout(() => {
+                isUnlocked = true;
+                document.getElementById('lockStatus').innerText = "✅ Features Unlocked!";
+                document.getElementById('lockStatus').style.color = "#00ff00";
+                
+                // Unlock cards
+                document.getElementById('tapCard').classList.remove('locked');
+                document.getElementById('memeCard').classList.remove('locked');
+                document.getElementById('stakeCard').classList.remove('locked');
+            }, 2000);
+        }
+
+        // Tap Logic
+        function tapAction() {
+            if (!isUnlocked) return;
+            const now = Date.now();
+            if (now - lastTapTime < TAP_COOLDOWN_MS) return;
+            points++;
+            lastTapTime = now;
+            document.getElementById('userPoints').innerText = points;
+        }
+
+        // Conversion Logic
+        async function convertPoints() {
+            if (!isUnlocked) return;
+            if (points < POINTS_REQUIRED) {
+                alert(`Need at least ${POINTS_REQUIRED} points!`);
                 return;
             }
-            alert("Transaction processing... Apne MetaMask mein confirmation check karein!");
+            if (!signer) {
+                alert("Connect wallet first!");
+                return;
+            }
+            alert("🔄 Request submitted! Points check hone ke baad 24 hours mein tokens transfer ho jayenge. ⏳");
+            points = 0;
+            document.getElementById('userPoints').innerText = points;
+        }
+
+        // Meme Upload Logic
+        function uploadMeme() {
+            if (!isUnlocked) return;
+            const fileInput = document.getElementById('memeFile');
+            if (fileInput.files.length === 0) {
+                alert("Select a meme image!");
+                return;
+            }
+            alert("📤 Meme uploaded for review! Rewards will be credited after approval. ⏳");
+        }
+
+        // Staking Logic
+        function stakeTokens() {
+            if (!isUnlocked) return;
+            if (!signer) {
+                alert("Connect wallet first!");
+                return;
+            }
+            alert("🔒 Staking functionality initializing... Ensure you have $ADS in wallet.");
         }
     </script>
 </body>
