@@ -112,34 +112,31 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // Updated Wallet Connection Logic with Popup Force
+        // Updated Wallet Connection Logic (Robust)
         connectBtn.addEventListener('click', async () => {
             if (window.ethereum) {
                 try {
-                    // 🔥 POPUP FORCE KARENGE PERMISSIONS REQUEST KARKE 🔥
-                    await window.ethereum.request({
-                        method: 'wallet_requestPermissions',
-                        params: [{ eth_accounts: {} }],
-                    });
-
-                    // 1. Amoy Testnet Switch
+                    // 1. Network Switch
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x13882' }],
+                        params: [{ chainId: '0x13882' }], // Amoy Testnet
                     });
                     
-                    // 2. Account Get Karein
+                    // 2. Request Account
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
 
+                    // 3. UI Update
                     connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
                     connectBtn.disabled = true;
                     isWalletConnected = true;
                     showToast("🎉 Wallet Connected Successfully! 🥳");
+                    
                 } catch (error) {
+                    console.error(error);
                     if (error.code === 4902) {
                         try {
                             await window.ethereum.request({
@@ -152,11 +149,11 @@
                                     blockExplorerUrls: ['https://amoy.polygonscan.com']
                                 }],
                             });
-                            // Retry connection
-                        } catch (addError) { showToast("Network Add Error: " + addError.message); }
-                    } else { showToast("Connection failed: " + error.message); }
+                            connectBtn.click(); // Retry connection
+                        } catch (addError) { showToast("❌ Add Network Failed"); }
+                    } else { showToast("❌ Connection Failed"); }
                 }
-            } else { showToast("⚠️ Please install MetaMask!"); }
+            } else { showToast("⚠️ MetaMask Not Found!"); }
         });
 
         function verifySocials() {
