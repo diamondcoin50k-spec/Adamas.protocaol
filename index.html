@@ -34,6 +34,14 @@
             font-weight: bold;
             color: #00F2FE;
             text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         .social-links {
             display: flex;
@@ -74,6 +82,21 @@
             box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
             transform: translateY(-2px);
         }
+        .button-secondary {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+        }
+        .button-secondary:hover {
+            background: #333;
+            border-color: #00F2FE;
+        }
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
         .roadmap-item {
             margin-bottom: 15px;
             padding-left: 10px;
@@ -88,16 +111,23 @@
         @media (max-width: 768px) {
             header { flex-direction: column; text-align: center; }
             .container { width: 95%; }
+            .grid-buttons { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">Adamas Protocol 💎</div>
-            <div class="social-links">
-                <a href="https://t.me/daimodmo" target="_blank" class="button">📱 Telegram</a>
-                <a href="https://x.com/DiamoProtocol" target="_blank" class="button">🐦 Twitter</a>
+            <div class="logo">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn5iXPC90ZXh0Pjwvc3ZnPg==" alt="logo" width="35">
+                Adamas Protocol 💎
+            </div>
+            <div class="header-right">
+                <div class="social-links">
+                    <a href="https://t.me/daimodmo" target="_blank" class="button button-secondary">📱 Telegram</a>
+                    <a href="https://x.com/DiamoProtocol" target="_blank" class="button button-secondary">🐦 Twitter</a>
+                </div>
+                <button class="button" onclick="connectWallet()">🦊 Connect</button>
             </div>
         </header>
 
@@ -106,13 +136,22 @@
             <p>Get ready for the most premium crypto experience. 💎</p>
             <p>Contract Address: <br><span class="accent">0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5</span></p>
             <p>Total Supply: <span class="accent">21,000 $ADS</span></p>
-            <button class="button" onclick="connectWallet()">🦊 Connect Wallet</button>
             <p id="walletStatus"></p>
         </div>
 
         <div class="card">
+            <h2>💰 Claim Airdrop & Earn</h2>
+            <p>Connect your wallet to claim your tokens instantly! 🥳</p>
+            <button class="button" style="width: 100%;" onclick="claimTokens()">🚀 Claim Airdrop</button>
+            
+            <div class="grid-buttons">
+                <button class="button button-secondary">⛏️ Mining Panel</button>
+                <button class="button button-secondary">🔒 Staking Portal</button>
+            </div>
+        </div>
+
+        <div class="card">
             <h2>🏆 Roadmap Phase Update</h2>
-            <p>Fantastic progress so far! 🥳 Here is our journey:</p>
             <div class="roadmap-item active">✅ Phase 1: Contract Deployment</div>
             <div class="roadmap-item active">⏳ Phase 2: Website & Bot Setup</div>
             <div class="roadmap-item">🔜 Phase 3: Marketing & Airdrop</div>
@@ -127,6 +166,7 @@
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     document.getElementById('walletStatus').innerHTML = "✅ Connected: <br><span class='accent'>" + accounts[0] + "</span>";
+                    document.querySelector("button[onclick='connectWallet()']").innerText = "🦊 Connected";
                     alert("🎉 Congratulations! Wallet Connected Successfully! 🥳");
                 } catch (error) {
                     alert("❌ Connection failed! Please try again.");
@@ -134,6 +174,11 @@
             } else {
                 alert("🦊 Please install MetaMask to connect!");
             }
+        }
+
+        // --- Claim Logic ---
+        function claimTokens() {
+            alert("🚀 Claiming process initiated! Ensure you have BNB for gas fees. 💎");
         }
     </script>
 </body>
