@@ -112,51 +112,53 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // --- UPDATED ROBUST CONNECT LOGIC ---
-        connectBtn.addEventListener('click', async () => {
-            if (window.ethereum) {
-              try {
-    // 1. Network Switch
-    await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x13882' }], // Amoy Testnet
-    });
-    
-    // 2. Request Account
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    
-    // 3. IMPORTANT: Init Ethers only after account access
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    contract = new ethers.Contract(contractAddress, contractABI, signer);
+        // Updated Wallet Connection Logic (Robust)
+connectBtn.addEventListener('click', async () => {
+    if (window.ethereum) {
+        try {
+            // 1. Pehle Network Switch ka POPUP aayega (Agar zaroori hua to)
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x13882' }], // Amoy Testnet
+            });
+            showToast("🔄 Connecting to Amoy Testnet...");
 
-    // 4. UI Update
-    connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-    connectBtn.disabled = true;
-    isWalletConnected = true;
-    showToast("🎉 Wallet Connected Successfully! 🥳");
-}
+            // 2. Ab Account ka POPUP aayega
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            
+            // 3. Ethers.js Setup
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                    // 1. Network Switch
+            // 4. UI Update
+            connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
+            connectBtn.disabled = true;
+            isWalletConnected = true;
+            showToast("🎉 Wallet Connected Successfully! 🥳");
+            
+        } catch (error) {
+            console.error(error);
+            if (error.code === 4902) {
+                // Network add karne ka popup
+                try {
                     await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x13882' }], // Amoy Testnet
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x13882',
+                            chainName: 'Polygon Amoy Testnet',
+                            nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                            rpcUrls: ['https://rpc-amoy.polygon.technology'],
+                            blockExplorerUrls: ['https://amoy.polygonscan.com']
+                        }],
                     });
-                    
-                    // 2. Request Account
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // 3. IMPORTANT: Init Ethers only after account access
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    connectBtn.click(); // Retry automatic connection
+                } catch (addError) { showToast("❌ Add Network Failed"); }
+            } else { showToast("❌ Connection Failed"); }
+        }
+    } else { showToast("⚠️ MetaMask Not Found!"); }
+});
 
-                    // 4. UI Update
-                    connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-                    connectBtn.disabled = true;
-                    isWalletConnected = true;
-                    showToast("🎉 Wallet Connected Successfully! 🥳");
-                    
                 } catch (error) {
                     console.error(error);
                     if (error.code === 4902) {
@@ -164,7 +166,7 @@
                             await window.ethereum.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
-                                    chainId: '0x13882',
+                                    chainId: '80002',
                                     chainName: 'Polygon Amoy Testnet',
                                     nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
                                     rpcUrls: ['https://rpc-amoy.polygon.technology'],
