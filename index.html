@@ -43,55 +43,10 @@
             <div class="logo">💎 Adamas Protocol</div>
             <div>
                 <span id="walletAddress" style="color: #00F2FE; margin-right: 15px; font-weight: bold;"></span>
-                <button class="button" id="connectBtn">🦊 Connect Wallet</button> 
+                <button class="button" id="connectBtn">🦊 Connect Wallet</button>
             </div>
         </header>
-        // Updated Wallet Connection Logic (Robust)
-connectBtn.addEventListener('click', async () => {
-    if (window.ethereum) {
-        try {
-            // 1. Pehle Network Switch ka POPUP aayega (Agar zaroori hua to)
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x13882' }], // Amoy Testnet
-            });
-            showToast("🔄 Connecting to Amoy Testnet...");
 
-            // 2. Ab Account ka POPUP aayega
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            // 3. Ethers.js Setup
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-            // 4. UI Update
-            connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-            connectBtn.disabled = true;
-            isWalletConnected = true;
-            showToast("🎉 Wallet Connected Successfully! 🥳");
-            
-        } catch (error) {
-            console.error(error);
-            if (error.code === 4902) {
-                // Network add karne ka popup
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x13882',
-                            chainName: 'Polygon Amoy Testnet',
-                            nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                            rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                            blockExplorerUrls: ['https://amoy.polygonscan.com']
-                        }],
-                    });
-                    connectBtn.click(); // Retry automatic connection
-                } catch (addError) { showToast("❌ Add Network Failed"); }
-            } else { showToast("❌ Connection Failed"); }
-        }
-    } else { showToast("⚠️ MetaMask Not Found!"); }
-});
         <div class="card" id="lockCard">
             <h2 style="color: #00F2FE;">🔒 Follow to Unlock Protocol</h2>
             <p>Pehle Wallet Connect karein, fir socials follow karke verify karein.</p>
@@ -157,7 +112,7 @@ connectBtn.addEventListener('click', async () => {
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // Updated Wallet Connection Logic (Robust)
+        // --- UPDATED ROBUST CONNECT LOGIC ---
         connectBtn.addEventListener('click', async () => {
             if (window.ethereum) {
                 try {
@@ -170,11 +125,12 @@ connectBtn.addEventListener('click', async () => {
                     // 2. Request Account
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
+                    // 3. IMPORTANT: Init Ethers only after account access
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-                    // 3. UI Update
+                    // 4. UI Update
                     connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
                     connectBtn.disabled = true;
                     isWalletConnected = true;
@@ -200,6 +156,7 @@ connectBtn.addEventListener('click', async () => {
                 }
             } else { showToast("⚠️ MetaMask Not Found!"); }
         });
+        // --- END OF CONNECT LOGIC ---
 
         function verifySocials() {
             if (!isWalletConnected) {
