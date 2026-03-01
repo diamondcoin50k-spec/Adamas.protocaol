@@ -46,7 +46,17 @@
                 <button class="button" id="connectBtn" onclick="connectWallet()">🦊 Connect Wallet</button>
             </div>
         </header>
-
+// 1. Wallet Connection
+    connectButton.addEventListener('click', async () => {
+        if (window.ethereum) {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                connectButton.innerText = accounts[0].substring(0, 6) + "...";
+                connectButton.disabled = true;
+                alert("🎉 Congratulations! Wallet Connected! 🥳");
+            } catch (e) { alert("❌ Connection failed"); }
+        } else { alert("⚠️ Please install MetaMask!"); }
+    });
         <div class="card" id="lockCard">
             <h2 style="color: #00F2FE;">🔒 Follow to Unlock Protocol</h2>
             <p>Pehle Wallet Connect karein, fir socials follow karke verify karein.</p>
