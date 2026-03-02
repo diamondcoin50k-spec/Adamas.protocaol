@@ -3,228 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adamas Protocol ($ADS) | Ecosystem</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <title>Adamas Protocol | Ecosystem</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
-        .container { width: 95%; max-width: 1200px; margin-top: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; flex-wrap: wrap; }
-        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 15px rgba(0, 242, 254, 0.7); }
-        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; transition: all 0.3s; }
-        .card:hover { border-color: #00F2FE; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
-        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s; font-size: 16px; display: inline-block; }
-        .button:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.7); transform: scale(1.05); }
-        .button-secondary { background: #222; color: #fff; border: 1px solid #444; }
-        .button-secondary:hover { background: #333; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
-        .tap-button { background: #00F2FE; color: #000; font-size: 28px; padding: 45px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.1s; box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); margin: 20px 0; font-weight: bold;}
-        .tap-button:active { transform: scale(0.92); box-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
-        .accent { color: #00F2FE; font-weight: bold; font-size: 22px; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .locked { opacity: 0.5; pointer-events: none; }
-        input[type="file"] { color: white; margin-bottom: 15px; }
+        body { background-color: #0a0a0a; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .card { background: #161616; padding: 20px; border-radius: 15px; border: 1px solid #222; margin-bottom: 20px; }
+        .accent { color: #00F2FE; font-weight: bold; font-size: 24px; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); }
+        .button { background: linear-gradient(90deg, #00F2FE, #4FACFE); color: #000; padding: 12px 25px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .locked { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
         
-        /* Toast Notification Style */
-        #toast { visibility: hidden; min-width: 250px; background-color: #161616; color: #fff; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #00F2FE; box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        /* Spin Wheel */
+        .wheel-container { position: relative; width: 200px; height: 200px; margin: 20px auto; border: 5px solid #00F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 4s cubic-bezier(0.1, 0, 0.2, 1); background: #1a1a1a; font-size: 50px; }
+        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid red; position: absolute; top: -10px; z-index: 10; }
 
-        @media (max-width: 600px) {
-            .logo { font-size: 22px; }
-            .button { padding: 10px 18px; font-size: 14px; }
-            #walletAddress { font-size: 12px; display: block; margin-top: 5px; }
-        }
+        #toast { visibility: hidden; min-width: 200px; background: #161616; border: 1px solid #00F2FE; color: #fff; text-align: center; border-radius: 10px; padding: 16px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; }
+        #toast.show { visibility: visible; animation: fadein 0.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
     </style>
 </head>
 <body>
     <div id="toast">Message</div>
     <div class="container">
-        <header>
-            <div class="logo">💎 Adamas Protocol</div>
-            <div>
-                <span id="walletAddress" style="color: #00F2FE; margin-right: 15px; font-weight: bold;"></span>
-                <button class="button" id="connectBtn">🦊 Connect Wallet</button>
-            </div>
-        </header>
+        <h1 style="color: #00F2FE;">💎 Adamas Protocol</h1>
+        <button class="button" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
 
-        <div class="card" id="lockCard">
-            <h2 style="color: #00F2FE;">🔒 Follow to Unlock Protocol</h2>
-            <p>Pehle Wallet Connect karein, fir socials follow karke verify karein.</p>
-            <div style="margin: 20px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <a href="https://t.me/daimodmo" target="_blank" class="button button-secondary">📱 Telegram</a>
-                <a href="https://twitter.com/DiamoProtocol" target="_blank" class="button button-secondary">🐦 Twitter</a>
-            </div>
-            <button class="button" onclick="verifySocials()">✅ Verify Follows</button>
-            <p id="lockStatus" style="margin-top: 15px; color: #ff4444; font-weight: bold;">❌ Features Locked</p>
-        </div>
-
-        <div class="grid">
-            <div class="card locked" id="tapCard">
-                <h2 style="color: #00F2FE;">🕹️ Tap to Earn</h2>
-                <p>Your Points: <span id="userPoints" class="accent">0</span></p>
-                <button class="tap-button" onclick="tapAction()">TAP</button>
-                <br>
-                <p>50,000 Points = 1 $ADS</p>
-                <button class="button" style="width: 100%;" onclick="convertPoints()">🔄 Convert to Tokens</button>
-            </div>
-
-            <div class="card locked" id="memeCard">
-                <h2 style="color: #00F2FE;">🎨 Meme-to-Earn</h2>
-                <p>Meme banakar upload karo!</p>
-                <input type="file" id="memeFile" accept="image/*">
-                <button class="button button-secondary" style="width: 100%;" onclick="uploadMeme()">📤 Upload Meme</button>
-                <p style="margin-top: 15px; font-size: 14px; color: #aaa;">Reward: 0.01 - 0.05 $ADS (Pending Review)</p>
-            </div>
+        <div class="card">
+            <p>Your Balance</p>
+            <div class="accent"><span id="points">0</span> Points</div>
+            <p style="font-size: 14px; color: #aaa;">Estimated Value: <span id="tokenPreview">0</span> $ADS</p>
             
-            <div class="card locked" id="stakeCard">
-                <h2 style="color: #00F2FE;">⛏️ Mining/Staking</h2>
-                <p>Pool Size: <span class="accent">1,000 $ADS</span></p>
-                <p>Earned tokens stake karke aur kamayein!</p>
-                <button class="button" style="width: 100%;" onclick="stakeTokens()">🔒 Stake $ADS</button>
-            </div>
+            <button class="button" id="convertBtn" onclick="submitClaimRequest()" style="background: #222; color: #00F2FE; border: 1px solid #00F2FE;">
+                Submit Claim Request
+            </button>
+            <p id="requestStatus" style="font-size: 12px; margin-top: 10px; color: #ffa500; display: none;">
+                ⏳ Your request is pending review...
+            </p>
         </div>
-        
-        <div class="card" style="text-align: left; margin-top: 25px;">
-            <h3>📊 Project Stats</h3>
-            <p>Contract Address: <span style="word-break: break-all; color: #4FACFE;">0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5</span></p>
-            <p>Network: <span style="color: #4FACFE;">Polygon Amoy Testnet</span></p>
+
+        <div class="card locked" id="spinSection">
+            <h3>🎡 Daily Lucky Spin</h3>
+            <div class="pointer"></div>
+            <div class="wheel-container" id="wheel">🎰</div>
+            <button class="button" id="spinBtn" onclick="spinNow()">SPIN FOR POINTS</button>
         </div>
     </div>
 
     <script>
-        let points = 0;
-        let provider, signer, contract;
-        let lastTapTime = 0;
-        const TAP_COOLDOWN_MS = 300; 
-        const POINTS_REQUIRED = 50000;
+        let userPoints = 0;
         let isWalletConnected = false;
-        let isSocialVerified = false;
-
-        // ABI Placeholder - UPDATE WITH YOUR REAL ABI
-        const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+        const CONVERSION_RATE = 1000; // 1000 Points = 1 $ADS
+        
+        // CONTRACT CONFIGURATION
         const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
-        const connectBtn = document.getElementById('connectBtn');
+        const contractABI =[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
 
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        let provider, signer, contract;
+        
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg; t.className = "show";
+            setTimeout(() => t.className = "", 3000);
         }
-             // Updated Wallet Connection Logic (Robust)
-connectBtn.addEventListener('click', async () => {
-    if (window.ethereum) {
-        try {
-            // 1. Pehle Network Switch ka POPUP aayega (Agar zaroori hua to)
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x13882' }], // Amoy Testnet
-            });
-            showToast("🔄 Connecting to Amoy Testnet...");
 
-            // 2. Ab Account ka POPUP aayega
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            // 3. Ethers.js Setup
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-            // 4. UI Update
-            connectBtn.innerText = accounts[0].substring(0, 6) + "..." + accounts[0].substring(38);
-            connectBtn.disabled = true;
-            isWalletConnected = true;
-            showToast("🎉 Wallet Connected Successfully! 🥳");
-            
-        } catch (error) {
-            console.error(error);
-            if (error.code === 4902) {
-                // Network add karne ka popup
+        async function connectWallet() {
+            if (window.ethereum) {
                 try {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x13882',
-                            chainName: 'Polygon Amoy Testnet',
-                            nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                            rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                            blockExplorerUrls: ['https://amoy.polygonscan.com']
-                        }],
-                    });
-                    connectBtn.click(); // Retry automatic connection
-                } catch (addError) { showToast("❌ Add Network Failed"); }
-            } else { showToast("❌ Connection Failed"); }
+                    // Force switch to Amoy
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x13882' }] });
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    // Init Ethers
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    
+                    document.getElementById("connectBtn").innerText = accounts[0].substring(0,6) + "... Connected";
+                    document.getElementById("spinSection").classList.remove("locked");
+                    isWalletConnected = true;
+                    showToast("✅ Wallet Connected!");
+                } catch (e) { showToast("❌ Connection Denied"); }
+            } else { showToast("🦊 Install MetaMask!"); }
         }
-    } else { showToast("⚠️ MetaMask Not Found!"); }
-});
 
-                } catch (error) {
-                    console.error(error);
-                    if (error.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '80002',
-                                    chainName: 'Polygon Amoy Testnet',
-                                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-                                    rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                                    blockExplorerUrls: ['https://amoy.polygonscan.com']
-                                }],
-                            });
-                            connectBtn.click(); // Retry connection
-                        } catch (addError) { showToast("❌ Add Network Failed"); }
-                    } else { showToast("❌ Connection Failed"); }
-                }
-            } else { showToast("⚠️ MetaMask Not Found!"); }
-        });
-        // --- END OF CONNECT LOGIC ---
+        function spinNow() {
+            if (!isWalletConnected) return;
 
-        function verifySocials() {
-            if (!isWalletConnected) {
-                showToast("🛑 Pehle Wallet Connect karo bhai! 🦊");
+            const lastSpin = localStorage.getItem("lastSpin");
+            if (lastSpin === new Date().toDateString()) {
+                showToast("⏳ Aaj ka spin ho gaya! Kal aana.");
                 return;
             }
-            showToast("🔄 Verifying... Please follow the channels first.");
+
+            const wheel = document.getElementById("wheel");
+            const spinBtn = document.getElementById("spinBtn");
+            const deg = Math.floor(Math.random() * 360) + 1440; 
+            wheel.style.transform = `rotate(${deg}deg)`;
+            spinBtn.disabled = true;
+
             setTimeout(() => {
-                isSocialVerified = true;
-                document.getElementById('lockStatus').innerText = "✅ Verified!";
-                document.getElementById('lockStatus').style.color = "#00ff00";
-                
-                document.getElementById('tapCard').classList.remove('locked');
-                document.getElementById('memeCard').classList.remove('locked');
-                document.getElementById('stakeCard').classList.remove('locked');
-                showToast("🎉 Features Unlocked! Start Earning! 🚀💸");
-            }, 1000);
+                const win = [100, 200, 300, 500][Math.floor(Math.random() * 4)];
+                userPoints += win;
+                updateUI();
+                localStorage.setItem("lastSpin", new Date().toDateString());
+                showToast(`🎁 Mubarak ho! ${win} Points mile!`);
+                spinBtn.disabled = false;
+            }, 4000);
         }
 
-        function tapAction() {
-            if (!isSocialVerified) { showToast("🛑 Verify socials first!"); return; }
-            const now = Date.now();
-            if (now - lastTapTime < TAP_COOLDOWN_MS) return;
-            points++;
-            lastTapTime = now;
-            document.getElementById('userPoints').innerText = points;
-            document.getElementById('userPoints').style.color = "#fff";
-            setTimeout(() => { document.getElementById('userPoints').style.color = "#00F2FE"; }, 100);
+        function updateUI() {
+            document.getElementById("points").innerText = userPoints;
+            document.getElementById("tokenPreview").innerText = (userPoints / CONVERSION_RATE).toFixed(2);
         }
 
-        function convertPoints() {
-            if (!isSocialVerified) { showToast("🛑 Verify socials first!"); return; }
-            if (points < POINTS_REQUIRED) { showToast(`Need ${POINTS_REQUIRED} points!`); return; }
-            showToast("🔄 Conversion request submitted! ⏳");
-            points = 0;
-            document.getElementById('userPoints').innerText = points;
-        }
+        function submitClaimRequest() {
+            if (!isWalletConnected) {
+                showToast("🛑 Pehle wallet connect karo!");
+                return;
+            }
+            
+            if (userPoints < CONVERSION_RATE) {
+                showToast(`❌ Minimum ${CONVERSION_RATE} points chahiye!`);
+                return;
+            }
 
-        function uploadMeme() {
-            if (!isSocialVerified) { showToast("🛑 Verify socials first!"); return; }
-            showToast("📤 Meme uploaded for review! ⏳");
-        }
-
-        function stakeTokens() {
-            if (!isSocialVerified) { showToast("🛑 Verify socials first!"); return; }
-            showToast("🔒 Staking initializing... ⏳");
+            const tokens = (userPoints / CONVERSION_RATE).toFixed(2);
+            showToast(`🚀 Claim Request for ${tokens} $ADS Sent!`);
+            
+            document.getElementById("requestStatus").style.display = "block";
+            document.getElementById("requestStatus").innerText = `✅ Request sent for ${tokens} $ADS. It will be sent to your wallet during the next airdrop round.`;
+            
+            // Reset points
+            userPoints = 0;
+            updateUI();
         }
     </script>
 </body>
