@@ -100,14 +100,31 @@
             setTimeout(() => t.className = "", 3000);
         }
 
-        // --- WALLET CONNECT (Robust) ---
+        // --- INSTANT WALLET CONNECT ---
         connectBtn.addEventListener('click', async () => {
             if (window.ethereum) {
                 try {
-                    // 1. Switch Network
-                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x13882' }] });
-                    // 2. Request Account
+                    // Force request accounts immediately to trigger popup
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    // Switch Network
+                    try {
+                        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x13882' }] });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            // Add network if not found
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x13882',
+                                    chainName: 'Polygon Amoy Testnet',
+                                    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                                    rpcUrls: ['https://rpc-amoy.polygon.technology'],
+                                    blockExplorerUrls: ['https://amoy.polygonscan.com']
+                                }],
+                            });
+                        }
+                    }
                     
                     // Init Ethers
                     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -116,8 +133,11 @@
                     
                     connectBtn.innerText = accounts[0].substring(0,6) + "...Connected";
                     isWalletConnected = true;
-                    showToast("✅ Connected to Amoy Testnet!");
-                } catch (e) { showToast("❌ Connection Failed"); console.error(e); }
+                    showToast("✅ Connected!");
+                } catch (e) { 
+                    showToast("❌ Connection Failed"); 
+                    console.error(e);
+                }
             } else { showToast("🦊 Install MetaMask!"); }
         });
 
@@ -134,8 +154,8 @@
                 isSocialVerified = true;
                 document.getElementById('claimCard').classList.remove('locked');
                 document.getElementById('featuresGrid').classList.remove('locked');
-                showToast("✅ Socials Verified! All features unlocked!");
-            }, 1500);
+                showToast("✅ Socials Verified! Unlocked!");
+            }, 1000);
         }
 
         function spinNow() {
@@ -164,7 +184,7 @@
 
         function uploadMeme() {
             if (!isWalletConnected || !isSocialVerified) return;
-            showToast("📤 Meme submitted for review!");
+            showToast("📤 Meme submitted!");
         }
 
         function stakeTokens() {
