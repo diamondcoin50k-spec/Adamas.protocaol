@@ -8,29 +8,20 @@
     <style>
         body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
         .container { width: 95%; max-width: 1200px; margin-top: 20px; }
-        
-        /* Header Fix: Logo Left, Button Right */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; flex-wrap: wrap; }
         .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 15px rgba(0, 242, 254, 0.7); }
-        .header-right { margin-left: auto; } /* Forces button to right */
-        
-        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; transition: 0.3s; }
-        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; display: inline-block; text-decoration: none; font-size: 16px;}
+        .header-right { margin-left: auto; }
+        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; }
+        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; font-weight: bold; cursor: pointer; border: none; text-decoration: none; display: inline-block; transition: 0.3s;}
         .button:hover { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); transform: scale(1.05); }
         .button-secondary { background: #222; color: #fff; border: 1px solid #444; }
-        .button-secondary:hover { background: #333; }
         .accent { color: #00F2FE; font-weight: bold; font-size: 24px; margin: 10px 0; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .locked { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+        .locked { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
         
-        /* Spin Wheel Style */
-        .wheel-box { position: relative; width: 150px; height: 150px; margin: 15px auto; border: 4px solid #00F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); background: #000; font-size: 40px; overflow: hidden; }
-        .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 25px solid #ff0000; z-index: 10; }
-
+        /* Toast */
         #toast { visibility: hidden; min-width: 250px; background-color: #161616; color: #fff; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #00F2FE; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        #toast.show { visibility: visible; }
     </style>
 </head>
 <body>
@@ -61,44 +52,34 @@
         </div>
 
         <div class="grid locked" id="featuresGrid">
-            <div class="card" id="spinCard">
+            <div class="card">
                 <h3>🎡 Daily Lucky Spin</h3>
-                <div class="pointer"></div>
-                <div class="wheel-box" id="wheel">🎰</div>
-                <button class="button" id="spinBtn" onclick="spinNow()">SPIN</button>
+                <button class="button" onclick="spinNow()">SPIN</button>
             </div>
-
-            <div class="card" id="tapCard">
+            <div class="card">
                 <h3>🕹️ Tap to Earn</h3>
-                <div style="font-size: 50px; cursor: pointer; margin: 20px;" onclick="tapAction()">👆</div>
+                <div style="font-size: 40px; cursor: pointer;" onclick="tapAction()">👆</div>
             </div>
-
-            <div class="card" id="memeCard">
+            <div class="card">
                 <h3>🎨 Meme to Earn</h3>
-                <input type="file" id="memeFile" accept="image/*" style="margin:10px 0; color:white;">
-                <button class="button" onclick="uploadMeme()">Upload Meme</button>
+                <button class="button" onclick="uploadMeme()">Upload</button>
             </div>
-            
-            <div class="card" id="stakeCard">
+            <div class="card">
                 <h3>⛏️ Staking/Mining</h3>
-                <p>Stake your $ADS tokens</p>
                 <button class="button" onclick="stakeTokens()">Stake</button>
             </div>
         </div>
     </div>
 
     <script>
-        let userPoints = 0;
         let isWalletConnected = false;
         let isSocialVerified = false;
-        const CONVERSION_RATE = 1000;
-        
-        // --- CONFIG ---
-        const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
-        const contractABI = []; // [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
-
-        let provider, signer, contract;
         const connectBtn = document.getElementById('connectBtn');
+
+        // --- 🛑 UPDATE THIS CONFIG 🛑 ---
+        const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5"; 
+        const contractABI = []; // [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+        // ---------------------------------
 
         function showToast(msg) {
             const t = document.getElementById("toast");
@@ -106,19 +87,24 @@
             setTimeout(() => t.className = "", 3000);
         }
 
-        // --- INSTANT WALLET CONNECT ---
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
         connectBtn.addEventListener('click', async () => {
-            if (window.ethereum) {
+            if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // Force request accounts immediately to trigger popup
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    showToast("🦊 Requesting MetaMask...");
                     
-                    // Switch Network
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    await sleep(500);
+                    
                     try {
-                        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x13882' }] });
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x13882' }],
+                        });
                     } catch (switchError) {
                         if (switchError.code === 4902) {
-                            // Add network if not found
+                            showToast("⏳ Adding Amoy Network...");
                             await window.ethereum.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
@@ -129,83 +115,41 @@
                                     blockExplorerUrls: ['https://amoy.polygonscan.com']
                                 }],
                             });
+                            await sleep(1000);
+                        } else {
+                            throw switchError;
                         }
                     }
                     
-                    // Init Ethers
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    if(contractABI.length > 0) {
-                        contract = new ethers.Contract(contractAddress, contractABI, signer);
-                    }
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const signer = provider.getSigner();
+                    const address = await signer.getAddress();
                     
-                    connectBtn.innerText = accounts[0].substring(0,6) + "...Connected";
+                    connectBtn.innerText = address.substring(0,6) + "...Connected";
                     isWalletConnected = true;
                     showToast("✅ Connected!");
-                } catch (e) { 
-                    showToast("❌ Connection Failed"); 
+                } catch (e) {
+                    showToast("❌ Connection Failed");
                     console.error(e);
                 }
-            } else { showToast("🦊 Install MetaMask!"); }
+            } else {
+                showToast("🦊 Install MetaMask!");
+            }
         });
-
-        // --- FEATURES ---
-        function updateUI() {
-            document.getElementById("userPoints").innerText = userPoints;
-            document.getElementById("tokenPreview").innerText = (userPoints / CONVERSION_RATE).toFixed(2);
-        }
 
         function verifySocials() {
             if(!isWalletConnected) { showToast("🛑 Connect Wallet First!"); return; }
-            showToast("🔄 Verifying...");
-            setTimeout(() => {
-                isSocialVerified = true;
-                document.getElementById('claimCard').classList.remove('locked');
-                document.getElementById('featuresGrid').classList.remove('locked');
-                showToast("✅ Socials Verified! Unlocked!");
-            }, 1000);
+            isSocialVerified = true;
+            document.getElementById('claimCard').classList.remove('locked');
+            document.getElementById('featuresGrid').classList.remove('locked');
+            showToast("✅ Unlocked!");
         }
-
-        function spinNow() {
-            if (!isWalletConnected || !isSocialVerified) return;
-            const lastSpin = localStorage.getItem("lastSpin");
-            if (lastSpin === new Date().toDateString()) { showToast("⏳ Come back tomorrow!"); return; }
-
-            const wheel = document.getElementById("wheel");
-            const deg = Math.floor(Math.random() * 360) + 1440; 
-            wheel.style.transform = `rotate(${deg}deg)`;
-            
-            setTimeout(() => {
-                const win = [50, 100, 200, 500][Math.floor(Math.random() * 4)];
-                userPoints += win;
-                updateUI();
-                localStorage.setItem("lastSpin", new Date().toDateString());
-                showToast(`🎁 You won ${win} points!`);
-            }, 4000);
-        }
-
-        function tapAction() {
-            if (!isWalletConnected || !isSocialVerified) return;
-            userPoints += 1;
-            updateUI();
-        }
-
-        function uploadMeme() {
-            if (!isWalletConnected || !isSocialVerified) return;
-            showToast("📤 Meme submitted!");
-        }
-
-        function stakeTokens() {
-            if (!isWalletConnected || !isSocialVerified) return;
-            showToast("🔒 Staking initiated!");
-        }
-
-        function submitClaimRequest() {
-            if (!isWalletConnected || !isSocialVerified || userPoints < CONVERSION_RATE) { showToast("❌ Not enough points!"); return; }
-            showToast("🚀 Claim Request Sent!");
-            userPoints = 0;
-            updateUI();
-        }
+        
+        function tapAction() { if(isWalletConnected && isSocialVerified) showToast("👆 Points +1"); }
+        function spinNow() { if(isWalletConnected && isSocialVerified) showToast("🎡 Spinning..."); }
+        function uploadMeme() { if(isWalletConnected && isSocialVerified) showToast("📤 Uploading..."); }
+        function stakeTokens() { if(isWalletConnected && isSocialVerified) showToast("🔒 Staking..."); }
+        function submitClaimRequest() { if(isWalletConnected && isSocialVerified) showToast("🚀 Request Sent!"); }
     </script>
 </body>
 </html>
