@@ -3,74 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adamas Protocol | Ecosystem</title>
+    <title>Adamas Protocol ($ADS) | Ecosystem</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background-color: #0a0a0a; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; }
-        .container { padding: 20px; max-width: 600px; margin: auto; }
-        .card { background: #161616; padding: 20px; border-radius: 15px; border: 1px solid #222; margin-bottom: 20px; }
-        .accent { color: #00F2FE; font-weight: bold; font-size: 24px; text-shadow: 0 0 10px rgba(0, 242, 254, 0.5); }
-        .button { background: linear-gradient(90deg, #00F2FE, #4FACFE); color: #000; padding: 12px 25px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; }
+        body { background-color: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
+        .container { width: 95%; max-width: 1200px; margin-top: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; flex-wrap: wrap; }
+        .logo { font-size: 28px; font-weight: bold; color: #00F2FE; text-shadow: 0 0 15px rgba(0, 242, 254, 0.7); }
+        .card { background-color: #161616; padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #222; text-align: center; transition: 0.3s; }
+        .button { background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%); color: #000; padding: 12px 24px; border-radius: 50px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; display: inline-block; text-decoration: none;}
+        .button:hover { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); transform: scale(1.05); }
+        .button-secondary { background: #222; color: #fff; border: 1px solid #444; }
+        .button-secondary:hover { background: #333; }
+        .tap-button { background: #00F2FE; color: #000; font-size: 28px; padding: 45px; border-radius: 50%; border: none; cursor: pointer; box-shadow: 0 0 30px rgba(0, 242, 254, 0.6); margin: 20px 0; font-weight: bold; }
+        .accent { color: #00F2FE; font-weight: bold; font-size: 22px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .locked { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
         
         /* Spin Wheel */
-        .wheel-container { position: relative; width: 200px; height: 200px; margin: 20px auto; border: 5px solid #00F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 4s cubic-bezier(0.1, 0, 0.2, 1); background: #1a1a1a; font-size: 50px; }
-        .pointer { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid red; position: absolute; top: -10px; z-index: 10; }
+        .wheel-box { position: relative; width: 150px; height: 150px; margin: 10px auto; border: 4px solid #00F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); background: #000; font-size: 40px; }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid #ff0000; z-index: 10; }
 
-        #toast { visibility: hidden; min-width: 200px; background: #161616; border: 1px solid #00F2FE; color: #fff; text-align: center; border-radius: 10px; padding: 16px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; }
-        #toast.show { visibility: visible; animation: fadein 0.5s; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #161616; color: #fff; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #00F2FE; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
     <div id="toast">Message</div>
     <div class="container">
-        <h1 style="color: #00F2FE;">💎 Adamas Protocol</h1>
-        <button class="button" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+        <header>
+            <div class="logo">💎 Adamas Protocol</div>
+            <button class="button" id="connectBtn" onclick="connectWallet()">🦊 Connect Wallet</button>
+        </header>
 
         <div class="card">
-            <p>Your Balance</p>
-            <div class="accent"><span id="points">0</span> Points</div>
-            <p style="font-size: 14px; color: #aaa;">Estimated Value: <span id="tokenPreview">0</span> $ADS</p>
-            
-            <button class="button" id="convertBtn" onclick="submitClaimRequest()" style="background: #222; color: #00F2FE; border: 1px solid #00F2FE;">
-                Submit Claim Request
-            </button>
-            <p id="requestStatus" style="font-size: 12px; margin-top: 10px; color: #ffa500; display: none;">
-                ⏳ Your request is pending review...
-            </p>
+            <h3>Your Ecosystem Points</h3>
+            <div class="accent"><span id="userPoints">0</span> Points</div>
+            <p>≈ <span id="tokenPreview">0</span> $ADS</p>
+            <button class="button button-secondary" onclick="submitClaimRequest()">Submit Claim Request</button>
         </div>
 
-        <div class="card locked" id="spinSection">
-            <h3>🎡 Daily Lucky Spin</h3>
-            <div class="pointer"></div>
-            <div class="wheel-container" id="wheel">🎰</div>
-            <button class="button" id="spinBtn" onclick="spinNow()">SPIN FOR POINTS</button>
+        <div class="grid">
+            <div class="card locked" id="spinCard">
+                <h3>🎡 Daily Lucky Spin</h3>
+                <div class="pointer"></div>
+                <div class="wheel-box" id="wheel">🎰</div>
+                <button class="button" id="spinBtn" onclick="spinNow()">SPIN</button>
+            </div>
+
+            <div class="card locked" id="tapCard">
+                <h3>🕹️ Tap to Earn</h3>
+                <div style="font-size: 50px; cursor: pointer; margin: 20px;" onclick="tapAction()">👆</div>
+            </div>
+
+            <div class="card locked" id="memeCard">
+                <h3>🎨 Meme to Earn</h3>
+                <input type="file" id="memeFile" accept="image/*" style="margin:10px 0;">
+                <button class="button" onclick="uploadMeme()">Upload Meme</button>
+            </div>
+            
+            <div class="card locked" id="stakeCard">
+                <h3>⛏️ Staking/Mining</h3>
+                <p>Stake your $ADS tokens</p>
+                <button class="button" onclick="stakeTokens()">Stake</button>
+            </div>
         </div>
     </div>
 
     <script>
         let userPoints = 0;
         let isWalletConnected = false;
-        const CONVERSION_RATE = 1000; // 1000 Points = 1 $ADS
+        const CONVERSION_RATE = 1000;
         
-        // CONTRACT CONFIGURATION
+        // --- CONFIG ---
         const contractAddress = "0x9D53BbacB70DD3D92604AdAC86FC4D5A6a96d2E5";
-        const contractABI =[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+        const contractABI = []; [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"LOCK_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"airdropPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"liquidityPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingPool","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"teamReserve","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}]
 
         let provider, signer, contract;
-        
+
         function showToast(msg) {
             const t = document.getElementById("toast");
             t.innerText = msg; t.className = "show";
             setTimeout(() => t.className = "", 3000);
         }
 
+        // --- WALLET CONNECT (FIXED) ---
         async function connectWallet() {
             if (window.ethereum) {
                 try {
-                    // Force switch to Amoy
+                    // Switch Network
                     await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x13882' }] });
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
@@ -79,62 +102,59 @@
                     signer = provider.getSigner();
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
                     
-                    document.getElementById("connectBtn").innerText = accounts[0].substring(0,6) + "... Connected";
-                    document.getElementById("spinSection").classList.remove("locked");
+                    document.getElementById("connectBtn").innerText = accounts[0].substring(0,6) + "...Connected";
+                    
+                    // Unlock All
+                    document.querySelectorAll('.card').forEach(c => c.classList.remove('locked'));
                     isWalletConnected = true;
-                    showToast("✅ Wallet Connected!");
-                } catch (e) { showToast("❌ Connection Denied"); }
+                    showToast("✅ Connected to Amoy Testnet!");
+                } catch (e) { showToast("❌ Connection Failed"); console.error(e); }
             } else { showToast("🦊 Install MetaMask!"); }
+        }
+
+        // --- FEATURES ---
+        function updateUI() {
+            document.getElementById("userPoints").innerText = userPoints;
+            document.getElementById("tokenPreview").innerText = (userPoints / CONVERSION_RATE).toFixed(2);
         }
 
         function spinNow() {
             if (!isWalletConnected) return;
-
             const lastSpin = localStorage.getItem("lastSpin");
-            if (lastSpin === new Date().toDateString()) {
-                showToast("⏳ Aaj ka spin ho gaya! Kal aana.");
-                return;
-            }
+            if (lastSpin === new Date().toDateString()) { showToast("⏳ Come back tomorrow!"); return; }
 
             const wheel = document.getElementById("wheel");
-            const spinBtn = document.getElementById("spinBtn");
             const deg = Math.floor(Math.random() * 360) + 1440; 
             wheel.style.transform = `rotate(${deg}deg)`;
-            spinBtn.disabled = true;
-
+            
             setTimeout(() => {
-                const win = [100, 200, 300, 500][Math.floor(Math.random() * 4)];
+                const win = [50, 100, 200, 500][Math.floor(Math.random() * 4)];
                 userPoints += win;
                 updateUI();
                 localStorage.setItem("lastSpin", new Date().toDateString());
-                showToast(`🎁 Mubarak ho! ${win} Points mile!`);
-                spinBtn.disabled = false;
+                showToast(`🎁 You won ${win} points!`);
             }, 4000);
         }
 
-        function updateUI() {
-            document.getElementById("points").innerText = userPoints;
-            document.getElementById("tokenPreview").innerText = (userPoints / CONVERSION_RATE).toFixed(2);
+        function tapAction() {
+            if (!isWalletConnected) return;
+            userPoints += 1;
+            updateUI();
+        }
+
+        function uploadMeme() {
+            if (!isWalletConnected) return;
+            showToast("📤 Meme submitted for review!");
+        }
+
+        function stakeTokens() {
+            if (!isWalletConnected) return;
+            showToast("🔒 Staking initiated!");
         }
 
         function submitClaimRequest() {
-            if (!isWalletConnected) {
-                showToast("🛑 Pehle wallet connect karo!");
-                return;
-            }
-            
-            if (userPoints < CONVERSION_RATE) {
-                showToast(`❌ Minimum ${CONVERSION_RATE} points chahiye!`);
-                return;
-            }
-
-            const tokens = (userPoints / CONVERSION_RATE).toFixed(2);
-            showToast(`🚀 Claim Request for ${tokens} $ADS Sent!`);
-            
-            document.getElementById("requestStatus").style.display = "block";
-            document.getElementById("requestStatus").innerText = `✅ Request sent for ${tokens} $ADS. It will be sent to your wallet during the next airdrop round.`;
-            
-            // Reset points
+            if (!isWalletConnected || userPoints < CONVERSION_RATE) { showToast("❌ Not enough points!"); return; }
+            showToast("🚀 Claim Request Sent!");
             userPoints = 0;
             updateUI();
         }
